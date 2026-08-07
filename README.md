@@ -100,8 +100,8 @@ XCFrameworks are built in the SDK source repo; this repo only takes the artifact
 3. Review, then publish (or pass `--publish` in step 2 to do both at once):
 
    ```bash
-   git push origin HEAD v1.0.0
-   gh release create v1.0.0 --title v1.0.0 --generate-notes dist/*.zip
+   git push origin HEAD 1.0.0
+   gh release create 1.0.0 --title 1.0.0 --generate-notes dist/*.zip
    ```
 
 Once the tag lands, the `verify` workflow checks that the tag matches `sdkVersion` and that every
@@ -110,7 +110,8 @@ asset is attached.
 ### Rules
 
 - The six values at the top of `Package.swift` (`sdkVersion`, `checksum*`) are **script-owned**.
-- Tags are `v<semver>`; the download URLs in `Package.swift` are assembled from the tag name.
+- Tags are the bare `<semver>` — no `v` prefix. The download URLs in `Package.swift` are
+  assembled from the tag name, so the two have to match exactly.
 - XCFramework binaries are never committed — Releases only (enforced by `.gitignore`).
 
 ## Ownership

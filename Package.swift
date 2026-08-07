@@ -19,7 +19,7 @@ let checksumWebRTC    = "29eb128478562531a6c02f5ed5c3a9fdf651b751e6e334bb3e266c1
 
 // MARK: -
 
-let releaseBase = "https://github.com/shoplive/shoplive-sdk-ios/releases/download/v\(sdkVersion)"
+let releaseBase = "https://github.com/shoplive/shoplive-sdk-ios/releases/download/\(sdkVersion)"
 
 let package = Package(
     name: "ShopliveSDK",

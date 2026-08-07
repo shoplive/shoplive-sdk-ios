@@ -55,7 +55,7 @@ done
 
 VERSION="${ARGS[0]}"
 ZIPS_DIR="${ARGS[1]}"
-TAG="v$VERSION"
+TAG="$VERSION"
 
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] \
   || die "version must be semver (got: $VERSION)"
