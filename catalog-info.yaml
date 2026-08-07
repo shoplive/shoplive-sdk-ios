@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: shoplive-sdk-ios
+  description: a repository to deploy shoplive ios sdk
+  annotations:
+    github.com/project-slug: shoplive/shoplive-sdk-ios
+    backstage.io/source-location: url:https://github.com/shoplive/shoplive-sdk-ios
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/shoplive-mobile
