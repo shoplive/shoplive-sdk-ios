@@ -1,0 +1,67 @@
+# Package.swift integrity checks.
+#  - PR / push: the manifest parses and the release-managed values are filled in
+#  - Tag:       the tag matches sdkVersion and all three release assets are attached
+#
+# Runner: GitHub-hosted macOS. Swap `runs-on` to move this onto a self-hosted mac runner.
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  manifest:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dump package manifest
+        run: swift package dump-package > /dev/null
+
+      - name: Check release-managed values
+        run: |
+          set -euo pipefail
+          version=$(sed -nE 's/^let sdkVersion[[:space:]]*= "(.*)"$/\1/p' Package.swift)
+          echo "sdkVersion=$version"
+          [ -n "$version" ] || { echo "::error::sdkVersion is empty"; exit 1; }
+
+          if [ "$version" = "0.0.0" ]; then
+            echo "::notice::No release cut yet (sdkVersion=0.0.0); skipping checksum checks."
+            exit 0
+          fi
+
+          fail=0
+          for key in checksumCore checksumPlayer checksumStreamer; do
+            value=$(sed -nE "s/^let $key[[:space:]]*= \"(.*)\"\$/\1/p" Package.swift)
+            if ! [[ "$value" =~ ^[0-9a-f]{64}$ ]]; then
+              echo "::error::$key is not a 64-char hex checksum: '$value'"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: Check tag matches sdkVersion
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          version=$(sed -nE 's/^let sdkVersion[[:space:]]*= "(.*)"$/\1/p' Package.swift)
+          tag="${GITHUB_REF_NAME}"
+          [ "v$version" = "$tag" ] \
+            || { echo "::error::tag ($tag) does not match sdkVersion ($version)"; exit 1; }
+
+      - name: Check all three release assets exist
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          assets=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')
+          echo "$assets"
+          fail=0
+          for module in ShopliveCore ShoplivePlayerSDK ShopliveStreamerSDK; do
+            grep -qx "$module.xcframework.zip" <<< "$assets" \
+              || { echo "::error::release is missing $module.xcframework.zip"; fail=1; }
+          done
+          exit $fail

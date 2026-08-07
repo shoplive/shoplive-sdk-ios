@@ -2,11 +2,11 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: shoplive-sdk-ios
-  description: a repository to deploy shoplive ios sdk
+  description: Shoplive iOS SDK XCFramework distribution (Swift Package Manager)
   annotations:
     github.com/project-slug: shoplive/shoplive-sdk-ios
     backstage.io/source-location: url:https://github.com/shoplive/shoplive-sdk-ios
 spec:
-  type: service
+  type: library
   lifecycle: production
   owner: group:default/shoplive-mobile
