@@ -12,9 +12,8 @@ them as Swift Package Manager binary targets.
 | Distribution | Swift Package Manager (binary targets) |
 | Xcode | 15.0+ (swift-tools-version 5.9) |
 
-> The iOS 15 floor comes from the unified Player embedding the WebRTC engine in a single binary,
-> plus the broadcasting path already sitting at 15. Dropping to iOS 13 is gated on confirming the
-> min deployment target of the rtc-ios binary
+> The iOS 15 floor comes from the playback and broadcasting paths already sitting at 15.
+> Dropping to iOS 13 is gated on confirming the min deployment target of the rtc-ios binary
 > ([Deployment Target Guide](https://shoplive.atlassian.net/wiki/spaces/MO/pages/1741717512)).
 
 ## Installation
@@ -50,12 +49,18 @@ targets: [
 
 | Product | Purpose | Bundled XCFrameworks |
 | --- | --- | --- |
-| `ShoplivePlayerSDK` | Playback (HLS + WebRTC, switched internally) | `ShoplivePlayerSDK`, `ShopliveCore` |
-| `ShopliveStreamerSDK` | Broadcasting (WebRTC) | `ShopliveStreamerSDK`, `ShopliveCore` |
+| `ShoplivePlayerSDK` | Playback (HLS + WebRTC, switched internally) | `ShoplivePlayerSDK`, `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+| `ShopliveStreamerSDK` | Broadcasting (WebRTC + RTMP) | `ShopliveStreamerSDK`, `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
 
-**You never add `ShopliveCore` yourself.** It is the shared core for auth, configuration,
-logging and networking, and it ships inside both products, so it is linked and embedded
-automatically. Using Player and Streamer together still pulls the Core binary in exactly once.
+**Two products, and you import only those two.** Everything else in the table is an
+implementation detail that ships alongside them:
+
+- `ShopliveCore` — shared auth, configuration, logging and networking
+- `ShopLiveWebRTCHelperSDK` — signalling helper used by both products
+- `WebRTC` — the Google WebRTC binary (~34MB dynamic framework, so it stays separate)
+
+None of these are products, so they never appear in the package-product picker, and you never
+add them yourself. Using Player and Streamer together still links each shared binary exactly once.
 
 ```swift
 import ShoplivePlayerSDK
@@ -64,33 +69,32 @@ Shoplive.initialize(.init(accessKey: "{ACCESS_KEY}"))
 Shoplive.setUser(.guest)
 ```
 
-> Reaching `Shoplive.*` through `import ShoplivePlayerSDK` alone requires the SDK sources to
-> re-export it with `@_exported import ShopliveCore`. Until that lands, add `import ShopliveCore`
-> as well — no extra package needed, the binary is already linked. See the
-> [Unified SDK Public Interface design doc](https://shoplive.atlassian.net/wiki/spaces/MO/pages/1739292725)
-> for the public API itself.
+`Shoplive.*` resolves without a second import because the Player and Streamer modules re-export
+the core (`@_exported import ShopliveCore`). See the
+[Unified SDK Public Interface design doc](https://shoplive.atlassian.net/wiki/spaces/MO/pages/1739292725)
+for the public API itself.
 
 ## Cutting a release
 
 XCFrameworks are built in the SDK source repo; this repo only takes the artifacts and ships them.
 
-1. Build the three modules in the SDK source repo and zip them. File names and the zip's root
-   layout are fixed:
+1. Get the five zips from the SDK source repo, collected in one directory. File names and the
+   zip's root layout are fixed — the names are what the download URLs in `Package.swift` point
+   at, so they carry no version suffix:
 
    ```
-   ShopliveCore.xcframework.zip        → ShopliveCore.xcframework/ at the root
-   ShoplivePlayerSDK.xcframework.zip   → ShoplivePlayerSDK.xcframework/ at the root
-   ShopliveStreamerSDK.xcframework.zip → ShopliveStreamerSDK.xcframework/ at the root
+   ShopliveCore.xcframework.zip            → ShopliveCore.xcframework/ at the root
+   ShoplivePlayerSDK.xcframework.zip       → ShoplivePlayerSDK.xcframework/ at the root
+   ShopliveStreamerSDK.xcframework.zip     → ShopliveStreamerSDK.xcframework/ at the root
+   ShopLiveWebRTCHelperSDK.xcframework.zip → ShopLiveWebRTCHelperSDK.xcframework/ at the root
+   WebRTC.xcframework.zip                  → WebRTC.xcframework/ at the root
    ```
 
-2. Run the release script here. It computes checksums, rewrites `Package.swift`, commits and
-   tags — **locally only**.
+2. Run the release script here, pointing it at that directory. It computes checksums, rewrites
+   `Package.swift`, commits and tags — **locally only**.
 
    ```bash
-   scripts/release.sh 1.0.0 \
-     dist/ShopliveCore.xcframework.zip \
-     dist/ShoplivePlayerSDK.xcframework.zip \
-     dist/ShopliveStreamerSDK.xcframework.zip
+   scripts/release.sh 1.0.0 <zips-dir>
    ```
 
 3. Review, then publish (or pass `--publish` in step 2 to do both at once):
@@ -100,12 +104,12 @@ XCFrameworks are built in the SDK source repo; this repo only takes the artifact
    gh release create v1.0.0 --title v1.0.0 --generate-notes dist/*.zip
    ```
 
-Once the tag lands, the `verify` workflow checks that the tag matches `sdkVersion` and that all
-three assets are attached.
+Once the tag lands, the `verify` workflow checks that the tag matches `sdkVersion` and that every
+asset is attached.
 
 ### Rules
 
-- The four values at the top of `Package.swift` (`sdkVersion`, `checksum*`) are **script-owned**.
+- The six values at the top of `Package.swift` (`sdkVersion`, `checksum*`) are **script-owned**.
 - Tags are `v<semver>`; the download URLs in `Package.swift` are assembled from the tag name.
 - XCFramework binaries are never committed — Releases only (enforced by `.gitignore`).
 
