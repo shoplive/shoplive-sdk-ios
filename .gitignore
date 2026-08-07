@@ -1,7 +1,18 @@
-build/
-.gradle/
-*.class
-.idea/
-*.iml
+# Distribution artifacts — never committed. They live on GitHub Releases only.
+dist/
+*.xcframework
+*.xcframework.zip
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
 .DS_Store
 .env

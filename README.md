@@ -1,20 +1,119 @@
-# shoplive-sdk-ios
+# Shoplive iOS SDK
 
-a repository to deploy shoplive ios sdk
+Distribution repo for the Shoplive iOS SDK, shipped as **XCFrameworks**. No source lives here.
+Every release tag carries the XCFramework zips, and the `Package.swift` at the root points at
+them as Swift Package Manager binary targets.
 
-> shopstage `create-repo` 템플릿으로 생성됨 (스타터: spring).
+## Requirements
 
-## 시작하기
+| | |
+| --- | --- |
+| Minimum iOS | **15.0** |
+| Distribution | Swift Package Manager (binary targets) |
+| Xcode | 15.0+ (swift-tools-version 5.9) |
 
-스타터는 로컬에서 바로 실행되는 최소 골격입니다. 빌드/실행 방법은 스택별 파일을 보세요
-(Dockerfile 포함 — 컨테이너 빌드가 기본 배포 단위입니다).
+> The iOS 15 floor comes from the playback and broadcasting paths already sitting at 15.
+> Dropping to iOS 13 is gated on confirming the min deployment target of the rtc-ios binary
+> ([Deployment Target Guide](https://shoplive.atlassian.net/wiki/spaces/MO/pages/1741717512)).
 
-## 배포
+## Installation
 
-EKS 배포가 필요해지면 [shopstage](https://internal.shoplive.cloud/shopstage) 의
-**add-service** 템플릿으로 gitops 등록을 이어가세요.
+### Xcode
 
-## 오너
+`File → Add Package Dependencies…`, then enter:
 
-- 팀: `shoplive-mobile` (CODEOWNERS 참고)
-- 카탈로그: [shopstage catalog](https://internal.shoplive.cloud/shopstage/catalog)
+```
+https://github.com/shoplive/shoplive-sdk-ios
+```
+
+Use `Up to Next Major Version` as the dependency rule. On the next screen, check only the
+products your app target needs.
+
+### Package.swift
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", from: "1.0.0")
+],
+targets: [
+    .target(
+        name: "YourApp",
+        dependencies: [
+            .product(name: "ShoplivePlayerSDK", package: "shoplive-sdk-ios")
+        ]
+    )
+]
+```
+
+## Modules
+
+| Product | Purpose | Bundled XCFrameworks |
+| --- | --- | --- |
+| `ShoplivePlayerSDK` | Playback (HLS + WebRTC, switched internally) | `ShoplivePlayerSDK`, `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+| `ShopliveStreamerSDK` | Broadcasting (WebRTC + RTMP) | `ShopliveStreamerSDK`, `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+
+**Two products, and you import only those two.** Everything else in the table is an
+implementation detail that ships alongside them:
+
+- `ShopliveCore` — shared auth, configuration, logging and networking
+- `ShopLiveWebRTCHelperSDK` — signalling helper used by both products
+- `WebRTC` — the Google WebRTC binary (~34MB dynamic framework, so it stays separate)
+
+None of these are products, so they never appear in the package-product picker, and you never
+add them yourself. Using Player and Streamer together still links each shared binary exactly once.
+
+```swift
+import ShoplivePlayerSDK
+
+Shoplive.initialize(.init(accessKey: "{ACCESS_KEY}"))
+Shoplive.setUser(.guest)
+```
+
+`Shoplive.*` resolves without a second import because the Player and Streamer modules re-export
+the core (`@_exported import ShopliveCore`). See the
+[Unified SDK Public Interface design doc](https://shoplive.atlassian.net/wiki/spaces/MO/pages/1739292725)
+for the public API itself.
+
+## Cutting a release
+
+XCFrameworks are built in the SDK source repo; this repo only takes the artifacts and ships them.
+
+1. Get the five zips from the SDK source repo, collected in one directory. File names and the
+   zip's root layout are fixed — the names are what the download URLs in `Package.swift` point
+   at, so they carry no version suffix:
+
+   ```
+   ShopliveCore.xcframework.zip            → ShopliveCore.xcframework/ at the root
+   ShoplivePlayerSDK.xcframework.zip       → ShoplivePlayerSDK.xcframework/ at the root
+   ShopliveStreamerSDK.xcframework.zip     → ShopliveStreamerSDK.xcframework/ at the root
+   ShopLiveWebRTCHelperSDK.xcframework.zip → ShopLiveWebRTCHelperSDK.xcframework/ at the root
+   WebRTC.xcframework.zip                  → WebRTC.xcframework/ at the root
+   ```
+
+2. Run the release script here, pointing it at that directory. It computes checksums, rewrites
+   `Package.swift`, commits and tags — **locally only**.
+
+   ```bash
+   scripts/release.sh 1.0.0 <zips-dir>
+   ```
+
+3. Review, then publish (or pass `--publish` in step 2 to do both at once):
+
+   ```bash
+   git push origin HEAD v1.0.0
+   gh release create v1.0.0 --title v1.0.0 --generate-notes dist/*.zip
+   ```
+
+Once the tag lands, the `verify` workflow checks that the tag matches `sdkVersion` and that every
+asset is attached.
+
+### Rules
+
+- The six values at the top of `Package.swift` (`sdkVersion`, `checksum*`) are **script-owned**.
+- Tags are `v<semver>`; the download URLs in `Package.swift` are assembled from the tag name.
+- XCFramework binaries are never committed — Releases only (enforced by `.gitignore`).
+
+## Ownership
+
+- Team: `shoplive-mobile` (see CODEOWNERS)
+- Catalog: [shopstage catalog](https://internal.shoplive.cloud/shopstage/catalog)
