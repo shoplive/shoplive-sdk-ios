@@ -10,12 +10,12 @@ import PackageDescription
 // The six values below are rewritten by scripts/release.sh. Do not edit them by hand.
 // Before the first release the checksums are empty, so resolution failing is expected.
 
-let sdkVersion        = "0.0.0"
-let checksumCore      = ""
-let checksumPlayer    = ""
-let checksumStreamer  = ""
-let checksumRTCHelper = ""
-let checksumWebRTC    = ""
+let sdkVersion        = "3.0.0"
+let checksumCore      = "d92f56a24f68993a38d7bd2c1ab580ce57e3b729117a7c4ab6c6355cec0f8148"
+let checksumPlayer    = "e1afcd48216c924477be9c9039d8e61211981d0c213cc3b82adc01c03c9db2b2"
+let checksumStreamer  = "8d4ffdc42fcc7cb2bd6c26ee9f4552f5686b8d317a1b9a11bf6c8eb174b2be0e"
+let checksumRTCHelper = "0cc0042195e16788ab6202676144f601abbe6633001d6131813aae453215c28e"
+let checksumWebRTC    = "29eb128478562531a6c02f5ed5c3a9fdf651b751e6e334bb3e266c110c8f5cee"
 
 // MARK: -
 
