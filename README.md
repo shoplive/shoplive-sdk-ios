@@ -94,14 +94,14 @@ XCFrameworks are built in the SDK source repo; this repo only takes the artifact
    `Package.swift`, commits and tags — **locally only**.
 
    ```bash
-   scripts/release.sh 1.0.0 <zips-dir>
+   scripts/release.sh <version> <zips-dir>
    ```
 
 3. Review, then publish (or pass `--publish` in step 2 to do both at once):
 
    ```bash
-   git push origin HEAD 1.0.0
-   gh release create 1.0.0 --title 1.0.0 --generate-notes dist/*.zip
+   git push origin HEAD <version>
+   gh release create <version> --title <version> --generate-notes dist/*.zip
    ```
 
 Once the tag lands, the `verify` workflow checks that the tag matches `sdkVersion` and that every
