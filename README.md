@@ -33,7 +33,7 @@ products your app target needs.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", from: "1.0.0")
+    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", from: "3.0.0")
 ],
 targets: [
     .target(
