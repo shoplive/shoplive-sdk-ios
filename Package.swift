@@ -24,9 +24,6 @@ let package = Package(
     name: "ShopliveSDK",
     platforms: [
         // The whole streaming path is already on 15, so iOS 15 is the floor.
-        // (Deployment Target Guide 2026-07-20 §1/§7)
-        // Dropping to iOS 13 is gated on the rtc-ios binary's min deployment target; lower this
-        // value once that is confirmed.
         .iOS(.v15)
     ],
     products: [
@@ -84,8 +81,8 @@ let package = Package(
             url: "\(releaseBase)/ShopLiveWebRTCHelperSDK.xcframework.zip",
             checksum: checksumRTCHelper
         ),
-        // Google WebRTC (from shoplive/rtc-ios). A ~34MB dynamic framework, so it cannot be
-        // folded into the modules that use it.
+        // Google WebRTC. A ~34MB dynamic framework, so it cannot be folded into the modules
+        // that use it.
         .binaryTarget(
             name: "WebRTC",
             url: "\(releaseBase)/WebRTC.xcframework.zip",
