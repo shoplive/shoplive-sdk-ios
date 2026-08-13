@@ -41,6 +41,14 @@ For a package manifest, add it to `dependencies`:
 ```swift
 dependencies: [
     .package(url: "https://github.com/shoplive/shoplive-sdk-ios", from: "3.0.0")
+],
+targets: [
+    .target(
+        name: "YourApp",
+        dependencies: [
+            .product(name: "ShoplivePlayerSDK", package: "shoplive-sdk-ios")
+        ]
+    )
 ]
 ```
 
