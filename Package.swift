@@ -1,8 +1,7 @@
 // swift-tools-version: 5.9
 // Shoplive iOS SDK — XCFramework distribution manifest.
 //
-// This repository holds no source. It only points at the XCFramework zips attached to each
-// release tag via binary targets. (Design doc: Unified SDK Public Interface §1 Module Layout)
+// Points at the XCFramework zips attached to each release tag via binary targets.
 
 import PackageDescription
 
