@@ -1,19 +1,6 @@
 # Shoplive iOS SDK
 
-Distribution repository for the Shoplive iOS SDK. **No SDK source lives here.**
-
-> Canonical repo: [`shoplive/shoplive-sdk-ios`](https://github.com/shoplive/shoplive-sdk-ios)
-
-Binaries (XCFramework zips) are published to:
-
-| Channel | Purpose |
-| --- | --- |
-| **GitHub Releases** | Downloadable `*.xcframework.zip` assets per version tag |
-| **`Package.swift` at the root** | Swift Package Manager binary targets resolving those assets |
-
-Consumers never need the internal modules (`ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC`).
-Declare **only** the product(s) you use — the shared binaries come bundled with each product
-(same behaviour as a transitive dependency).
+The Shoplive Android SDK, distributed as XCFrameworks. Binaries (`*.xcframework.zip`) are attached to each GitHub Release, and the `Package.swift` at the root resolves them as Swift Package Manager binary targets.
 
 ## Requirements
 
@@ -25,9 +12,9 @@ Declare **only** the product(s) you use — the shared binaries come bundled wit
 
 ## Installation
 
-### 1. Package
+### 1. Add the package (SPM)
 
-Xcode → `File → Add Package Dependencies…`, then enter:
+In Xcode, go to `File → Add Package Dependencies…` and enter:
 
 ```
 https://github.com/shoplive/shoplive-sdk-ios
@@ -52,7 +39,29 @@ targets: [
 ]
 ```
 
-### 2. Products
+### 2. Dependencies
+
+The SDK has **no third-party dependencies you need to declare**. Each product bundles the
+shared Shoplive binaries it needs, so declaring the product is enough:
+
+| Product | Bundled binaries |
+| --- | --- |
+| `ShoplivePlayerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+| `ShopliveStreamerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+
+If you use both products, the shared binaries link once — SPM deduplicates identical binary
+targets across products.
+
+> Do **not** add `ShopliveCore` / `ShopLiveWebRTCHelperSDK` / `WebRTC` yourself unless Shoplive
+> support asks you to. They are implementation details of the product SDKs, and they are not
+> declared as products — so they never appear in the package-product picker.
+
+### 3. Products
+
+| Product | Purpose |
+| --- | --- |
+| `ShoplivePlayerSDK` | Live / VOD playback (HLS + WebRTC, switched internally) |
+| `ShopliveStreamerSDK` | Broadcasting (WebRTC + RTMP) |
 
 #### Player only
 
@@ -65,9 +74,6 @@ targets: [
 )
 ```
 
-That single line pulls in the shared Shoplive binaries bundled with the product
-(`ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC`).
-
 #### Streamer only
 
 ```swift
@@ -79,7 +85,7 @@ That single line pulls in the shared Shoplive binaries bundled with the product
 )
 ```
 
-#### Player + Streamer together
+#### All (Player + Streamer)
 
 ```swift
 .target(
@@ -91,22 +97,7 @@ That single line pulls in the shared Shoplive binaries bundled with the product
 )
 ```
 
-Shared binaries (`ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC`) link once; SPM deduplicates
-identical binary targets across products.
-
-> Do **not** add `ShopliveCore` / `ShopLiveWebRTCHelperSDK` / `WebRTC` yourself unless Shoplive
-> support asks you to. They are implementation details of the product SDKs, and they are not
-> declared as products — so they never appear in the package-product picker.
-
-## Products
-
-| Product | Purpose | Bundled binaries |
-| --- | --- | --- |
-| `ShoplivePlayerSDK` | Live / VOD playback (HLS + WebRTC, switched internally) | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
-| `ShopliveStreamerSDK` | Broadcasting (WebRTC + RTMP) | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
-
-On **3.x**, shared auth / configuration / logging / networking surfaces ship inside
-`ShopliveCore`. You only depend on the product SDK rows above.
+Once resolved, import the product you declared:
 
 ```swift
 import ShoplivePlayerSDK
@@ -115,8 +106,9 @@ Shoplive.initialize(.init(accessKey: "{ACCESS_KEY}"))
 Shoplive.setUser(.guest)
 ```
 
-`Shoplive.*` resolves without a second import because the Player and Streamer modules re-export
-the core (`@_exported import ShopliveCore`).
+On **3.x**, shared auth / configuration / logging / networking surfaces ship inside
+`ShopliveCore`. `Shoplive.*` resolves without a second import because the Player and Streamer
+modules re-export the core (`@_exported import ShopliveCore`).
 
 ## Releases
 
@@ -124,13 +116,14 @@ the core (`@_exported import ShopliveCore`).
   attached XCFramework zips.
 - Tags are the bare `<semver>` (no `v` prefix); `Package.swift` resolves binaries from the
   matching tag.
+- Each release lists the version's changes; check the notes before bumping, especially for a
+  raised minimum iOS version.
 
-## Note on "Source code" zip / tar.gz
+> **On the "Source code" zip / tar.gz assets:** GitHub always attaches auto-generated source
+> archives to a Release. Those archives are **this distribution repo** (README / manifest), not
+> the private SDK sources.
 
-GitHub always attaches auto-generated source archives to a Release. Those archives are **this
-distribution repo** (README / manifest), not the private SDK sources.
-
-## Ownership
+## Ownership & Support
 
 - Team: Shoplive Mobile
 - Contact: [ask@shoplive.cloud](mailto:ask@shoplive.cloud)
