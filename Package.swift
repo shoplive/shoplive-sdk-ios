@@ -1,8 +1,7 @@
 // swift-tools-version: 5.9
 // Shoplive iOS SDK — XCFramework distribution manifest.
 //
-// This repository holds no source. It only points at the XCFramework zips attached to each
-// release tag via binary targets. (Design doc: Unified SDK Public Interface §1 Module Layout)
+// Points at the XCFramework zips attached to each release tag via binary targets.
 
 import PackageDescription
 
@@ -25,9 +24,6 @@ let package = Package(
     name: "ShopliveSDK",
     platforms: [
         // The whole streaming path is already on 15, so iOS 15 is the floor.
-        // (Deployment Target Guide 2026-07-20 §1/§7)
-        // Dropping to iOS 13 is gated on the rtc-ios binary's min deployment target; lower this
-        // value once that is confirmed.
         .iOS(.v15)
     ],
     products: [
@@ -85,8 +81,8 @@ let package = Package(
             url: "\(releaseBase)/ShopLiveWebRTCHelperSDK.xcframework.zip",
             checksum: checksumRTCHelper
         ),
-        // Google WebRTC (from shoplive/rtc-ios). A ~34MB dynamic framework, so it cannot be
-        // folded into the modules that use it.
+        // Google WebRTC. A ~34MB dynamic framework, so it cannot be folded into the modules
+        // that use it.
         .binaryTarget(
             name: "WebRTC",
             url: "\(releaseBase)/WebRTC.xcframework.zip",
