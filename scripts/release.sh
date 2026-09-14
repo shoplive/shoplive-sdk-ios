@@ -17,12 +17,17 @@
 # sit on the merged commit, which does not exist yet.
 #
 # The XCFrameworks themselves are built in the SDK source repo. This repo only ships them.
+#
+# 이 스크립트는 1.x(국내) 라인 전용이다. 3.x 는 main 브랜치의 같은 파일이 담당하며
+# 모듈 목록과 매니페스트 키가 서로 다르다. --latest=false 로 고정하는 이유는 저장소의
+# Latest 배지를 3.x 라인이 가져야 하기 때문이다(SwiftPM·CocoaPods 는 이 배지를 보지
+# 않지만, 저장소를 처음 여는 사람이 보는 기본 버전이 된다).
 
 set -euo pipefail
 
 # Parallel arrays rather than an associative one: macOS ships bash 3.2, which has no `declare -A`.
-MODULES=(ShopliveCore ShoplivePlayerSDK ShopliveStreamerSDK ShopLiveWebRTCHelperSDK WebRTC)
-MANIFEST_KEYS=(checksumCore checksumPlayer checksumStreamer checksumRTCHelper checksumWebRTC)
+MODULES=(ShopLiveSDK ShopliveSDKCommon ShopliveAPI ShopLiveShortformSDK ShopLiveShortformEditorSDK ShopliveFilterSDK)
+MANIFEST_KEYS=(checksumPlayer checksumCommon checksumAPI checksumShortform checksumEditor checksumFilter)
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPO_ROOT/Package.swift"
@@ -134,7 +139,7 @@ Stopped at the local commit and tag. Review, then run the commands below —
 or re-run this script with --publish.
 
   git push origin HEAD "$TAG"
-  gh release create "$TAG" --title "$TAG" --generate-notes ${ZIPS[*]}
+  gh release create "$TAG" --title "$TAG" --latest=false --generate-notes ${ZIPS[*]}
 
 EOF
   exit 0
@@ -143,5 +148,5 @@ fi
 command -v gh >/dev/null || die "--publish requires the gh CLI"
 
 git push origin HEAD "$TAG"
-gh release create "$TAG" --title "$TAG" --generate-notes "${ZIPS[@]}"
+gh release create "$TAG" --title "$TAG" --latest=false --generate-notes "${ZIPS[@]}"
 echo "released $TAG"

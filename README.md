@@ -1,18 +1,26 @@
-# Shoplive iOS SDK
+# Shoplive iOS SDK — v1 line
 
-The Shoplive Android SDK, distributed as XCFrameworks. Binaries (`*.xcframework.zip`) are attached to each GitHub Release, and the `Package.swift` at the root resolves them as Swift Package Manager binary targets.
+The Shoplive iOS SDK (domestic v1 line), distributed as XCFrameworks. Binaries
+(`*.xcframework.zip`) are attached to each GitHub Release, and the `Package.swift` on this
+branch resolves them as Swift Package Manager binary targets.
+
+> **This repository ships two lines.** `main` carries the 3.x unified SDK; this `release/1.x`
+> branch carries the 1.x line. SwiftPM only reads the manifest stored in the tag it resolves,
+> so the two never meet in a single resolution, and their product / target names do not
+> overlap.
+>
+> **Do not merge this branch into `main`.** Merging would overwrite the 3.x manifest and break
+> 3.x distribution. Pull requests from this branch are for review only.
 
 ## Requirements
 
 | | |
 | --- | --- |
-| Minimum iOS | **15.0** (see release notes if a release raises the floor) |
-| Distribution | Swift Package Manager (binary targets) |
+| Minimum iOS | **15.0** (raised from 11.0 in 1.9.0 for Xcode 27) |
+| Distribution | Swift Package Manager (binary targets) · CocoaPods |
 | Xcode | 15.0+ recommended (swift-tools-version 5.9) |
 
-## Installation
-
-### 1. Add the package (SPM)
+## Installation (SPM)
 
 In Xcode, go to `File → Add Package Dependencies…` and enter:
 
@@ -20,95 +28,67 @@ In Xcode, go to `File → Add Package Dependencies…` and enter:
 https://github.com/shoplive/shoplive-sdk-ios
 ```
 
-Use `Up to Next Major Version` as the dependency rule. On the next screen, check only the
-products your app target needs.
+**Set the dependency rule to `Up to Next Major Version` with `1.9.0` as the base.** The 3.x
+line lives in this same repository, so anchoring to 1.9.0 keeps resolution inside the 1.x
+range.
 
-For a package manifest, add it to `dependencies`:
+For a package manifest:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", from: "3.0.0")
+    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", .upToNextMajor(from: "1.9.0"))
 ],
 targets: [
     .target(
         name: "YourApp",
         dependencies: [
-            .product(name: "ShoplivePlayerSDK", package: "shoplive-sdk-ios")
+            .product(name: "ShopLiveSDK",       package: "shoplive-sdk-ios"),
+            .product(name: "ShopliveSDKCommon", package: "shoplive-sdk-ios")
         ]
     )
 ]
 ```
 
-### 2. Dependencies
+## Products
 
-The SDK has **no third-party dependencies you need to declare**. Each product bundles the
-shared Shoplive binaries it needs, so declaring the product is enough:
+| Product | Required | Purpose | `import` |
+| --- | --- | --- | --- |
+| `ShopLiveSDK` | ✅ | Live player · PIP | `ShopLiveSDK` |
+| `ShopliveSDKCommon` | ✅ | Auth (access key) · user settings · shared API | `ShopliveSDKCommon` |
+| `ShopliveShortformSDK` | — | Shortform | `ShopLiveShortformSDK` |
+| `ShopLiveShortformEditorSDK` | — | Shortform editor | `ShopLiveShortformEditorSDK` |
+| `ShopliveFilterSDK` | — | Editor filters | `ShopliveFilterSDK` |
 
-| Product | Bundled binaries |
-| --- | --- |
-| `ShoplivePlayerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
-| `ShopliveStreamerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+`ShopliveAPI` ships inside the `ShopliveSDKCommon` product as a target rather than a product of
+its own, so there is nothing extra to add.
 
-If you use both products, the shared binaries link once — SPM deduplicates identical binary
-targets across products.
+> The product name and the module name differ for the player: the product is `ShopLiveSDK` and
+> so is the module, but earlier releases published the same binary under a product named
+> `ShopLive` from the `shoplive/ios-sdk` repository. Import `ShopLiveSDK`.
 
-> Do **not** add `ShopliveCore` / `ShopLiveWebRTCHelperSDK` / `WebRTC` yourself unless Shoplive
-> support asks you to. They are implementation details of the product SDKs, and they are not
-> declared as products — so they never appear in the package-product picker.
+## Installation (CocoaPods)
 
-### 3. Products
+CocoaPods specs are published to the Shoplive spec repo, not the CocoaPods trunk. Declare both
+sources — naming any source disables the implicit default CDN, and omitting the official CDN
+breaks every *other* pod in your Podfile.
 
-| Product | Purpose |
-| --- | --- |
-| `ShoplivePlayerSDK` | Live / VOD playback (HLS + WebRTC, switched internally) |
-| `ShopliveStreamerSDK` | Broadcasting (WebRTC + RTMP) |
+```ruby
+source 'https://cdn.cocoapods.org/'
+source 'https://github.com/shoplive/pod-specs.git'
 
-#### Player only
+platform :ios, '15.0'
+use_frameworks!
 
-```swift
-.target(
-    name: "YourApp",
-    dependencies: [
-        .product(name: "ShoplivePlayerSDK", package: "shoplive-sdk-ios")
-    ]
-)
+target 'YourApp' do
+  pod 'ShopLive',          '1.9.0'
+  pod 'ShopliveSDKCommon', '1.9.0'
+end
 ```
 
-#### Streamer only
+The pod is still named `ShopLive` (unchanged from 1.8.x), while the module it vendors is
+`ShopLiveSDK`.
 
-```swift
-.target(
-    name: "YourApp",
-    dependencies: [
-        .product(name: "ShopliveStreamerSDK", package: "shoplive-sdk-ios")
-    ]
-)
-```
-
-#### All (Player + Streamer)
-
-```swift
-.target(
-    name: "YourApp",
-    dependencies: [
-        .product(name: "ShoplivePlayerSDK", package: "shoplive-sdk-ios"),
-        .product(name: "ShopliveStreamerSDK", package: "shoplive-sdk-ios")
-    ]
-)
-```
-
-Once resolved, import the product you declared:
-
-```swift
-import ShoplivePlayerSDK
-
-Shoplive.initialize(.init(accessKey: "{ACCESS_KEY}"))
-Shoplive.setUser(.guest)
-```
-
-On **3.x**, shared auth / configuration / logging / networking surfaces ship inside
-`ShopliveCore`. `Shoplive.*` resolves without a second import because the Player and Streamer
-modules re-export the core (`@_exported import ShopliveCore`).
+Use SPM **or** CocoaPods, never both — installing through both duplicates symbols.
 
 ## Releases
 
@@ -116,8 +96,9 @@ modules re-export the core (`@_exported import ShopliveCore`).
   attached XCFramework zips.
 - Tags are the bare `<semver>` (no `v` prefix); `Package.swift` resolves binaries from the
   matching tag.
-- Each release lists the version's changes; check the notes before bumping, especially for a
-  raised minimum iOS version.
+- **1.x releases are published with `--latest=false`.** The repository's *Latest* badge belongs
+  to the 3.x line. Neither SwiftPM nor CocoaPods reads that badge, so it affects only what a
+  visitor sees first.
 
 > **On the "Source code" zip / tar.gz assets:** GitHub always attaches auto-generated source
 > archives to a Release. Those archives are **this distribution repo** (README / manifest), not
