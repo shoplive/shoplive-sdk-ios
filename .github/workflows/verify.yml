@@ -33,7 +33,7 @@ jobs:
           fi
 
           fail=0
-          for key in checksumPlayer checksumCommon checksumAPI checksumShortform checksumEditor checksumFilter; do
+          for key in checksumPlayer checksumCommon checksumAPI; do
             value=$(sed -nE "s/^let $key[[:space:]]*= \"(.*)\"\$/\1/p" Package.swift)
             if ! [[ "$value" =~ ^[0-9a-f]{64}$ ]]; then
               echo "::error::$key is not a 64-char hex checksum: '$value'"
@@ -60,7 +60,7 @@ jobs:
           assets=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')
           echo "$assets"
           fail=0
-          for module in ShopLiveSDK ShopliveSDKCommon ShopliveAPI ShopLiveShortformSDK ShopLiveShortformEditorSDK ShopliveFilterSDK; do
+          for module in ShopLiveSDK ShopliveSDKCommon ShopliveAPI; do
             grep -qx "$module.xcframework.zip" <<< "$assets" \
               || { echo "::error::release is missing $module.xcframework.zip"; fail=1; }
           done

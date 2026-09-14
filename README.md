@@ -55,12 +55,24 @@ targets: [
 | --- | --- | --- | --- |
 | `ShopLiveSDK` | ✅ | Live player · PIP | `ShopLiveSDK` |
 | `ShopliveSDKCommon` | ✅ | Auth (access key) · user settings · shared API | `ShopliveSDKCommon` |
-| `ShopliveShortformSDK` | — | Shortform | `ShopLiveShortformSDK` |
-| `ShopLiveShortformEditorSDK` | — | Shortform editor | `ShopLiveShortformEditorSDK` |
-| `ShopliveFilterSDK` | — | Editor filters | `ShopliveFilterSDK` |
 
 `ShopliveAPI` ships inside the `ShopliveSDKCommon` product as a target rather than a product of
 its own, so there is nothing extra to add.
+
+### Shortform
+
+Shortform and the shortform editor are **not** distributed from this repository. Keep using
+their own packages:
+
+| Module | Repository |
+| --- | --- |
+| `ShopLiveShortformSDK` | [shoplive/shortform-ios](https://github.com/shoplive/shortform-ios) |
+| `ShopLiveShortformEditorSDK` · `ShopliveFilterSDK` | [shoplive/shortform-editor-ios](https://github.com/shoplive/shortform-editor-ios) |
+
+They link against `ShopliveSDKCommon` at runtime but do not declare it, so add both this
+package and the shortform package to your app target. The shipped shortform binaries are built
+for iOS 11; they run unchanged on an iOS 15 app, and `BUILD_LIBRARY_FOR_DISTRIBUTION` keeps
+them ABI-compatible with the 1.9.0 Common.
 
 > The product name and the module name differ for the player: the product is `ShopLiveSDK` and
 > so is the module, but earlier releases published the same binary under a product named
@@ -82,6 +94,9 @@ use_frameworks!
 target 'YourApp' do
   pod 'ShopLive',          '1.9.0'
   pod 'ShopliveSDKCommon', '1.9.0'
+
+  # Shortform keeps its own version line
+  # pod 'ShopliveShortformSDK', '1.8.13'
 end
 ```
 

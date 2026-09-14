@@ -9,20 +9,21 @@
 //
 // ⚠️ 이 브랜치는 main 에 머지하지 않는다. 머지하면 main 의 매니페스트가 1.x 로 덮여
 // 3.x 배포가 깨진다. PR 을 여는 것은 리뷰 목적에 한한다.
+//
+// 숏폼·숏폼 Editor 는 이 매니페스트에 없다. 기존대로 shoplive/shortform-ios 와
+// shoplive/shortform-editor-ios 에서 받는다. 두 모듈은 1.8.7(matrix-sdk-ios 557a45d9c)
+// 에서 Tuist 프로젝트 정의가 제거돼 현재 빌드 경로가 없고, 이번 릴리즈의 대상이 아니다.
 
 import PackageDescription
 
 // MARK: - Release-managed
-// 아래 일곱 값은 scripts/release.sh 가 덮어쓴다. 손으로 고치지 않는다.
+// 아래 네 값은 scripts/release.sh 가 덮어쓴다. 손으로 고치지 않는다.
 // 첫 릴리즈 전에는 checksum 이 비어 있으므로 해석이 실패하는 것이 정상이다.
 
-let sdkVersion        = "0.0.0"
-let checksumPlayer    = ""
-let checksumCommon    = ""
-let checksumAPI       = ""
-let checksumShortform = ""
-let checksumEditor    = ""
-let checksumFilter    = ""
+let sdkVersion     = "0.0.0"
+let checksumPlayer = ""
+let checksumCommon = ""
+let checksumAPI    = ""
 
 // MARK: -
 
@@ -46,21 +47,6 @@ let package = Package(
         .library(
             name: "ShopliveSDKCommon",
             targets: ["ShopliveSDKCommon", "ShopliveAPI"]
-        ),
-        // 숏폼
-        .library(
-            name: "ShopliveShortformSDK",
-            targets: ["ShopLiveShortformSDK"]
-        ),
-        // 숏폼 Editor
-        .library(
-            name: "ShopLiveShortformEditorSDK",
-            targets: ["ShopLiveShortformEditorSDK"]
-        ),
-        // Editor 필터
-        .library(
-            name: "ShopliveFilterSDK",
-            targets: ["ShopliveFilterSDK"]
         )
     ],
     targets: [
@@ -78,21 +64,6 @@ let package = Package(
             name: "ShopliveAPI",
             url: "\(releaseBase)/ShopliveAPI.xcframework.zip",
             checksum: checksumAPI
-        ),
-        .binaryTarget(
-            name: "ShopLiveShortformSDK",
-            url: "\(releaseBase)/ShopLiveShortformSDK.xcframework.zip",
-            checksum: checksumShortform
-        ),
-        .binaryTarget(
-            name: "ShopLiveShortformEditorSDK",
-            url: "\(releaseBase)/ShopLiveShortformEditorSDK.xcframework.zip",
-            checksum: checksumEditor
-        ),
-        .binaryTarget(
-            name: "ShopliveFilterSDK",
-            url: "\(releaseBase)/ShopliveFilterSDK.xcframework.zip",
-            checksum: checksumFilter
         )
     ]
 )

@@ -11,8 +11,10 @@ additive.
   below iOS 15; no source change is required otherwise.
 - **Distribution moved to this repository.** The player and Common modules were previously
   published from `shoplive/ios-sdk` and `shoplive/common-ios` as path-based binary targets;
-  they now resolve from release assets here. Shortform and its editor keep their own
-  repositories for CocoaPods and are mirrored into this manifest as release assets.
+  they now resolve from release assets here. Those two repositories are frozen at 1.8.15.
+- **Shortform is not part of this release.** `ShopLiveShortformSDK`,
+  `ShopLiveShortformEditorSDK` and `ShopliveFilterSDK` stay in their own repositories at
+  1.8.13 and are unaffected. Their iOS 11 binaries run unchanged on an iOS 15 app.
 - The player's SPM product is now `ShopLiveSDK`, matching its module name (previously the
   product was `ShopLive` while the module was `ShopLiveSDK`). The CocoaPods pod name is
   unchanged (`ShopLive`).
