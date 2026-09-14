@@ -20,10 +20,10 @@ import PackageDescription
 // 아래 네 값은 scripts/release.sh 가 덮어쓴다. 손으로 고치지 않는다.
 // 첫 릴리즈 전에는 checksum 이 비어 있으므로 해석이 실패하는 것이 정상이다.
 
-let sdkVersion     = "0.0.0"
-let checksumPlayer = ""
-let checksumCommon = ""
-let checksumAPI    = ""
+let sdkVersion     = "1.9.0"
+let checksumPlayer = "a67ff7e67aa9eb456659e3fb2ee056afd5b7223837673e844af29f23a0e6c898"
+let checksumCommon = "f325a7caa9ca54cb31b1784949af4f802a83f1e3f3dd124120a70b4ec3e84f8a"
+let checksumAPI    = "edbb24bf6282767b345abbc575cc47856c947cd5f5254c46ee374ffcac8bfd7c"
 
 // MARK: -
 
