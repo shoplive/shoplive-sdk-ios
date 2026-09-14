@@ -3,7 +3,7 @@
 //
 // 각 릴리즈 태그에 첨부된 XCFramework zip 을 binary target 으로 가리킨다.
 //
-// 이 저장소는 두 라인을 함께 배포한다. main 은 3.x(통합 SDK), 이 브랜치(release/1.x)는 1.x(국내)이며
+// 이 저장소는 두 라인을 함께 배포한다. main 은 3.x(통합 SDK), 이 브랜치(release/v1)는 1.x(국내)이며
 // SwiftPM 은 태그에 담긴 매니페스트만 읽으므로 둘은 한 해석에 함께 등장하지 않는다.
 // product·target 이름도 서로 겹치지 않는다.
 //

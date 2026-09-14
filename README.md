@@ -4,13 +4,13 @@ The Shoplive iOS SDK (domestic v1 line), distributed as XCFrameworks. Binaries
 (`*.xcframework.zip`) are attached to each GitHub Release, and the `Package.swift` on this
 branch resolves them as Swift Package Manager binary targets.
 
-> **This repository ships two lines.** `main` carries the 3.x unified SDK; this `release/1.x`
+> **This repository ships two lines.** `main` carries the 3.x unified SDK; this `release/v1`
 > branch carries the 1.x line. SwiftPM only reads the manifest stored in the tag it resolves,
 > so the two never meet in a single resolution, and their product / target names do not
 > overlap.
 >
 > **Do not merge this branch into `main`.** Merging would overwrite the 3.x manifest and break
-> 3.x distribution. `release/1.x` is the 1.x line's own base branch: 1.x work branches off it
+> 3.x distribution. `release/v1` is the 1.x line's own base branch: 1.x work branches off it
 > and merges back into it, never into `main`.
 
 ## Requirements
@@ -108,16 +108,16 @@ Use SPM **or** CocoaPods, never both — installing through both duplicates symb
 
 ## Releasing (1.x)
 
-`release/1.x` is the base branch for this line. It is never merged into `main`, and no
+`release/v1` is the base branch for this line. It is never merged into `main`, and no
 per-version branch is kept around — the two long-lived branches are `main` (3.x) and
-`release/1.x` (1.x).
+`release/v1` (1.x).
 
 A release goes:
 
-1. Branch off `release/1.x` (e.g. `release/1.9.1`)
+1. Branch off `release/v1` (e.g. `release/1.9.1`)
 2. `scripts/release.sh <version> <zips-dir> --no-tag` — rewrites the release-managed values
    in `Package.swift` and commits
-3. Open a PR into `release/1.x` and merge it
+3. Open a PR into `release/v1` and merge it
 4. Tag the merge commit, then publish the release with `--latest=false` and attach the zips
 
 `--no-tag` exists for exactly this: the tag has to sit on the merged commit, which does not
