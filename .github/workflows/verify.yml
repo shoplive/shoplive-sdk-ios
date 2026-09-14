@@ -8,7 +8,7 @@ name: verify
 on:
   pull_request:
   push:
-    branches: [release/1.x]
+    branches: ['release/**']
     tags: ['[0-9]*']
 
 jobs:

@@ -4,7 +4,7 @@ The Shoplive iOS SDK (domestic v1 line), distributed as XCFrameworks. Binaries
 (`*.xcframework.zip`) are attached to each GitHub Release, and the `Package.swift` on this
 branch resolves them as Swift Package Manager binary targets.
 
-> **This repository ships two lines.** `main` carries the 3.x unified SDK; this `release/1.x`
+> **This repository ships two lines.** `main` carries the 3.x unified SDK; this `release/1.9.0`
 > branch carries the 1.x line. SwiftPM only reads the manifest stored in the tag it resolves,
 > so the two never meet in a single resolution, and their product / target names do not
 > overlap.
