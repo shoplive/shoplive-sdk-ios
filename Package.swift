@@ -21,9 +21,9 @@ import PackageDescription
 // 첫 릴리즈 전에는 checksum 이 비어 있으므로 해석이 실패하는 것이 정상이다.
 
 let sdkVersion     = "1.9.0"
-let checksumPlayer = "a67ff7e67aa9eb456659e3fb2ee056afd5b7223837673e844af29f23a0e6c898"
-let checksumCommon = "f325a7caa9ca54cb31b1784949af4f802a83f1e3f3dd124120a70b4ec3e84f8a"
-let checksumAPI    = "edbb24bf6282767b345abbc575cc47856c947cd5f5254c46ee374ffcac8bfd7c"
+let checksumPlayer = "d31f0f6837d00b01f0532b9dd1200df3e59b1c15ec44fcb97ce7a80984a2a199"
+let checksumCommon = "0df96229fa8b799ee199d11fe83f6e154b9ce6d1e840cbf2948c823f21533336"
+let checksumAPI    = "532a78198293c802690b9336dd5301cbfd5b15b4ee1b6b84ff3a525743a6f9b7"
 
 // MARK: -
 
