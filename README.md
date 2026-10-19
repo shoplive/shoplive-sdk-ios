@@ -37,14 +37,17 @@ For a package manifest:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", .upToNextMajor(from: "1.9.0"))
+    .package(url: "https://github.com/shoplive/shoplive-sdk-ios", .upToNextMajor(from: "1.9.1")),
+    .package(url: "https://github.com/shoplive/common-ios", exact: "1.9.0")
 ],
 targets: [
     .target(
         name: "YourApp",
         dependencies: [
             .product(name: "ShopLiveSDK",       package: "shoplive-sdk-ios"),
-            .product(name: "ShopliveSDKCommon", package: "shoplive-sdk-ios")
+            // Common 은 1.9.1 부터 shoplive/common-ios 패키지가 싣는다 (ShopLiveSDK 가 의존으로 끌어온다).
+            // 앱 코드에서 `import ShopliveSDKCommon` 을 쓰면 명시한다:
+            .product(name: "ShopliveSDKCommon", package: "common-ios")
         ]
     )
 ]
@@ -55,10 +58,16 @@ targets: [
 | Product | Required | Purpose | `import` |
 | --- | --- | --- | --- |
 | `ShopLiveSDK` | ✅ | Live player · PIP | `ShopLiveSDK` |
-| `ShopliveSDKCommon` | ✅ | Auth (access key) · user settings · shared API | `ShopliveSDKCommon` |
+| `ShopliveSDKCommon` (package **`common-ios`**) | ✅ | Auth (access key) · user settings · shared API | `ShopliveSDKCommon` |
 
 `ShopliveAPI` ships inside the `ShopliveSDKCommon` product as a target rather than a product of
 its own, so there is nothing extra to add.
+
+> **Common moved to `shoplive/common-ios` (1.9.1~).** `ShopLiveSDK` declares `common-ios` as a
+> dependency, so Common resolves with it. Shortform and the shortform editor declare the same
+> package, which lets SwiftPM resolve Common once — and lets 3.x apps add shortform, since they no
+> longer need this repository at two versions. Migration from 1.9.0: change
+> `.product(name: "ShopliveSDKCommon", package: "shoplive-sdk-ios")` to `package: "common-ios"`.
 
 ### Shortform
 
@@ -70,10 +79,12 @@ their own packages:
 | `ShopLiveShortformSDK` | [shoplive/shortform-ios](https://github.com/shoplive/shortform-ios) |
 | `ShopLiveShortformEditorSDK` · `ShopliveFilterSDK` | [shoplive/shortform-editor-ios](https://github.com/shoplive/shortform-editor-ios) |
 
-They link against `ShopliveSDKCommon` at runtime but do not declare it, so add both this
-package and the shortform package to your app target. The shipped shortform binaries are built
-for iOS 11; they run unchanged on an iOS 15 app, and `BUILD_LIBRARY_FOR_DISTRIBUTION` keeps
-them ABI-compatible with the 1.9.0 Common.
+> ⚠️ **Shortform 1.8.13 is not compatible with Common 1.8.15 or later (including 1.9.0).** Common
+> 1.8.15 moved `SLHTTPMethod`, `APIDefinition`, `BaseResponsable`, `ShopLiveCommonError` and others
+> into the `ShopliveAPI` module without `@_originallyDefinedIn`; the 1.8.13 shortform binaries still
+> reference them in `ShopliveSDKCommon`, so dyld stops the app at launch (`Symbol not found`).
+> Use shortform **1.9.0** (built against Common 1.9.0, declares `common-ios`) with this release, or
+> stay on player 1.8.14 + Common 1.8.14 + shortform 1.8.13.
 
 > The product name and the module name differ for the player: the product is `ShopLiveSDK` and
 > so is the module, but earlier releases published the same binary under a product named

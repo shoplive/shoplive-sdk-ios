@@ -26,8 +26,12 @@
 set -euo pipefail
 
 # Parallel arrays rather than an associative one: macOS ships bash 3.2, which has no `declare -A`.
-MODULES=(ShopLiveSDK ShopliveSDKCommon ShopliveAPI)
-MANIFEST_KEYS=(checksumPlayer checksumCommon checksumAPI)
+# Common(ShopliveSDKCommon · ShopliveAPI)은 1.9.1 부터 shoplive/common-ios 매니페스트가 싣는다. 이 매니페스트는
+# 플레이어 checksum 과 common-ios 버전(commonVersion)만 가진다. Common zip 은 계속 이 저장소 릴리스 에셋으로
+# 올리고(common-ios 가 그 url 을 가리킨다), CHECKSUM 은 common-ios PR 에 쓰도록 출력만 한다.
+MODULES=(ShopLiveSDK)
+MANIFEST_KEYS=(checksumPlayer)
+EXTRA_ASSETS=(ShopliveSDKCommon ShopliveAPI)
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPO_ROOT/Package.swift"
@@ -102,6 +106,14 @@ for i in "${!MODULES[@]}"; do
   printf '  %-24s %s\n' "$module" "${CHECKSUMS[$i]}"
 done
 
+# Common zip — 이 매니페스트에는 없지만 common-ios 가 이 릴리스 에셋을 가리키므로 함께 올린다.
+for module in "${EXTRA_ASSETS[@]}"; do
+  zip="$ZIPS_DIR/$module.xcframework.zip"
+  [ -f "$zip" ] || die "$module: zip not found — $zip (common-ios 가 이 릴리스 에셋을 가리킨다)"
+  ZIPS+=("$zip")
+  printf '  %-24s %s   (→ common-ios Package.swift)\n' "$module" "$(swift package compute-checksum "$zip")"
+done
+
 # ---- Rewrite Package.swift ---------------------------------------------------
 
 set_manifest_value() {
@@ -112,6 +124,8 @@ set_manifest_value() {
 }
 
 set_manifest_value sdkVersion "$VERSION"
+# common-ios 태그. 기본은 릴리스 버전과 같다(1.x 는 Common 과 한 버전으로 나간다).
+set_manifest_value commonVersion "${COMMON_VERSION:-$VERSION}"
 for i in "${!MODULES[@]}"; do
   set_manifest_value "${MANIFEST_KEYS[$i]}" "${CHECKSUMS[$i]}"
 done
