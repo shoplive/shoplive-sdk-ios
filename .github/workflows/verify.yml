@@ -1,6 +1,7 @@
 # Package.swift integrity checks.
 #  - PR / push: the manifest parses and the release-managed values are filled in
-#  - Tag:       the tag matches sdkVersion and every release asset is attached
+#               (a missing common-ios tag for commonVersion is only a warning here)
+#  - Tag:       the tag matches sdkVersion, the common-ios tag exists and the release asset is attached
 #
 # Runner: GitHub-hosted macOS. Swap `runs-on` to move this onto a self-hosted mac runner.
 name: verify
@@ -33,13 +34,26 @@ jobs:
           fi
 
           fail=0
-          for key in checksumPlayer checksumCommon checksumAPI; do
-            value=$(sed -nE "s/^let $key[[:space:]]*= \"(.*)\"\$/\1/p" Package.swift)
-            if ! [[ "$value" =~ ^[0-9a-f]{64}$ ]]; then
-              echo "::error::$key is not a 64-char hex checksum: '$value'"
+          checksum=$(sed -nE 's/^let checksumPlayer[[:space:]]*= "(.*)"$/\1/p' Package.swift)
+          if ! [[ "$checksum" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::checksumPlayer is not a 64-char hex checksum: '$checksum'"
+            fail=1
+          fi
+
+          common=$(sed -nE 's/^let commonVersion[[:space:]]*= "(.*)"$/\1/p' Package.swift)
+          echo "commonVersion=$common"
+          if ! [[ "$common" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::commonVersion is not X.Y.Z: '$common'"
+            fail=1
+          elif ! git ls-remote --exit-code --tags https://github.com/shoplive/common-ios "refs/tags/$common" > /dev/null; then
+            # common-ios is tagged before this repo, so a PR may land ahead of that tag.
+            if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              echo "::error::shoplive/common-ios has no tag $common"
               fail=1
+            else
+              echo "::warning::shoplive/common-ios has no tag $common yet; it must exist before this repo is tagged."
             fi
-          done
+          fi
           exit $fail
 
       - name: Check tag matches sdkVersion
@@ -51,7 +65,7 @@ jobs:
           [ "$version" = "$tag" ] \
             || { echo "::error::tag ($tag) does not match sdkVersion ($version)"; exit 1; }
 
-      - name: Check every release asset exists
+      - name: Check the release asset exists
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
@@ -59,9 +73,6 @@ jobs:
           set -euo pipefail
           assets=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')
           echo "$assets"
-          fail=0
-          for module in ShopLiveSDK ShopliveSDKCommon ShopliveAPI; do
-            grep -qx "$module.xcframework.zip" <<< "$assets" \
-              || { echo "::error::release is missing $module.xcframework.zip"; fail=1; }
-          done
-          exit $fail
+          # Common binaries ship from shoplive/common-ios; only the player zip is attached here.
+          grep -qx "ShopLiveSDK.xcframework.zip" <<< "$assets" \
+            || { echo "::error::release is missing ShopLiveSDK.xcframework.zip"; exit 1; }

@@ -5,6 +5,23 @@ additive.
 
 ## Unreleased
 
+### Changed
+
+- **Common moved to `shoplive/common-ios` for SwiftPM.** `ShopLiveSDK` now declares
+  `common-ios` (exact `commonVersion`) and pulls Common in through a link-only target; this
+  package no longer has a `ShopliveSDKCommon` product. Migrate
+  `.product(name: "ShopliveSDKCommon", package: "shoplive-sdk-ios")` → `package: "common-ios"`.
+  Same Common/API binaries as 1.9.0 (now resolved from `common-ios` 1.9.0, which ships them
+  itself). CocoaPods is unchanged (`pod 'ShopliveSDKCommon'`).
+  Why: shortform needs Common 1.9.0 while the 3.x player lives in this same package, so a 3.x app
+  could not add shortform through SwiftPM. Sharing `common-ios` fixes that and keeps 1.x apps on a
+  single Common.
+
+### Fixed
+
+- README no longer claims shortform 1.8.13 is ABI-compatible with Common 1.9.0 — it is not
+  (launch crash, `Symbol not found`). Use shortform 1.9.1 with this line.
+
 ## 1.9.0
 
 ### Changed
