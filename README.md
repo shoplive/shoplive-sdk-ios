@@ -29,9 +29,9 @@ In Xcode, go to `File → Add Package Dependencies…` and enter:
 https://github.com/shoplive/shoplive-sdk-ios
 ```
 
-**Set the dependency rule to `Up to Next Major Version` with `1.9.0` as the base.** The 3.x
-line lives in this same repository, so anchoring to 1.9.0 keeps resolution inside the 1.x
-range.
+**Set the dependency rule to `Up to Next Major Version` with `1.9.1` as the base.** The 3.x
+line lives in this same repository, so anchoring to 1.9.1 keeps resolution inside the 1.x
+range, and 1.9.1 is the first version that resolves Common from `common-ios`.
 
 For a package manifest:
 
@@ -83,7 +83,7 @@ their own packages:
 > 1.8.15 moved `SLHTTPMethod`, `APIDefinition`, `BaseResponsable`, `ShopLiveCommonError` and others
 > into the `ShopliveAPI` module without `@_originallyDefinedIn`; the 1.8.13 shortform binaries still
 > reference them in `ShopliveSDKCommon`, so dyld stops the app at launch (`Symbol not found`).
-> Use shortform **1.9.0** (built against Common 1.9.0, declares `common-ios`) with this release, or
+> Use shortform **1.9.1** (built against Common 1.9.0, declares `common-ios`) with this release, or
 > stay on player 1.8.14 + Common 1.8.14 + shortform 1.8.13.
 
 > The product name and the module name differ for the player: the product is `ShopLiveSDK` and
@@ -104,11 +104,12 @@ platform :ios, '15.0'
 use_frameworks!
 
 target 'YourApp' do
+  # Use 1.9.1 once its spec is published to the Shoplive spec repo; 1.9.0 works with Common 1.9.0.
   pod 'ShopLive',          '1.9.0'
   pod 'ShopliveSDKCommon', '1.9.0'
 
-  # Shortform keeps its own version line
-  # pod 'ShopliveShortformSDK', '1.8.13'
+  # Shortform keeps its own version line (1.9.1 or later with Common 1.9.0)
+  # pod 'ShopliveShortformSDK', '1.9.1'
 end
 ```
 
@@ -129,13 +130,17 @@ A release goes:
 2. `scripts/release.sh <version> <zips-dir> --no-tag` — rewrites the release-managed values
    in `Package.swift` and commits
 3. Open a PR into `release/v1` and merge it
-4. Tag the merge commit, then publish the release with `--latest=false` and attach the zips
+4. Tag the merge commit, then publish the release with `--latest=false` and attach
+   `ShopLiveSDK.xcframework.zip`
+
+`commonVersion` keeps its current value unless `COMMON_VERSION=X.Y.Z` is set, and the matching
+`shoplive/common-ios` tag must exist before this repository is tagged (Common ships its own
+binaries from `common-ios`).
 
 `--no-tag` exists for exactly this: the tag has to sit on the merged commit, which does not
 exist while the PR is still open.
 
-The XCFrameworks are built in the SDK source repo (`matrix-sdk-ios`, domestic line). This
-repo only ships them.
+The XCFrameworks are built in the SDK source repository. This repo only ships them.
 
 ## Releases
 

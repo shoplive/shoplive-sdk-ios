@@ -20,7 +20,7 @@ import PackageDescription
 
 // MARK: - Release-managed
 // 아래 값은 scripts/release.sh 가 덮어쓴다. 손으로 고치지 않는다.
-// commonVersion 은 shoplive/common-ios 의 태그다 — release.sh 의 COMMON_VERSION 으로 바꾼다(기본 = 릴리스 버전).
+// commonVersion 은 shoplive/common-ios 의 태그다 — release.sh 의 COMMON_VERSION 으로 바꾼다(기본 = 현재 값 유지).
 
 let sdkVersion     = "1.9.0"
 let checksumPlayer = "d31f0f6837d00b01f0532b9dd1200df3e59b1c15ec44fcb97ce7a80984a2a199"
