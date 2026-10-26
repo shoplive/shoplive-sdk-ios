@@ -46,13 +46,13 @@ shared Shoplive binaries it needs, so declaring the product is enough:
 
 | Product | Bundled binaries |
 | --- | --- |
-| `ShoplivePlayerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
+| `ShoplivePlayerSDK` | `ShoplivePlayerCore`, `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
 | `ShopliveStreamerSDK` | `ShopliveCore`, `ShopLiveWebRTCHelperSDK`, `WebRTC` |
 
 If you use both products, the shared binaries link once — SPM deduplicates identical binary
 targets across products.
 
-> Do **not** add `ShopliveCore` / `ShopLiveWebRTCHelperSDK` / `WebRTC` yourself unless Shoplive
+> Do **not** add `ShoplivePlayerCore` / `ShopliveCore` / `ShopLiveWebRTCHelperSDK` / `WebRTC` yourself unless Shoplive
 > support asks you to. They are implementation details of the product SDKs, and they are not
 > declared as products — so they never appear in the package-product picker.
 
@@ -108,7 +108,8 @@ Shoplive.setUser(.guest)
 
 On **3.x**, shared auth / configuration / logging / networking surfaces ship inside
 `ShopliveCore`. `Shoplive.*` resolves without a second import because the Player and Streamer
-modules re-export the core (`@_exported import ShopliveCore`).
+modules re-export the core (`@_exported import ShopliveCore`). The Player module also re-exports
+`ShoplivePlayerCore`, so `import ShoplivePlayerSDK` is the only import a player integration needs.
 
 ## Releases
 
