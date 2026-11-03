@@ -21,8 +21,8 @@
 set -euo pipefail
 
 # Parallel arrays rather than an associative one: macOS ships bash 3.2, which has no `declare -A`.
-MODULES=(ShopliveCore ShoplivePlayerSDK ShopliveStreamerSDK ShopLiveWebRTCHelperSDK WebRTC)
-MANIFEST_KEYS=(checksumCore checksumPlayer checksumStreamer checksumRTCHelper checksumWebRTC)
+MODULES=(ShopliveCore ShoplivePlayerSDK ShopliveStreamerSDK ShopliveStreamerCore ShopLiveWebRTCHelperSDK WebRTC)
+MANIFEST_KEYS=(checksumCore checksumPlayer checksumStreamer checksumStreamerCore checksumRTCHelper checksumWebRTC)
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPO_ROOT/Package.swift"
