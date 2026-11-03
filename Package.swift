@@ -6,13 +6,14 @@
 import PackageDescription
 
 // MARK: - Release-managed
-// The six values below are rewritten by scripts/release.sh. Do not edit them by hand.
+// The seven values below are rewritten by scripts/release.sh. Do not edit them by hand.
 // Before the first release the checksums are empty, so resolution failing is expected.
 
 let sdkVersion        = "3.0.2"
 let checksumCore      = "0ead2c64147fc195dc647b93ac1c5da71c37b4e0bc98e40604b9dc0ada63f81c"
 let checksumPlayer    = "c52249cd448f1e98a92e72b10a18839b4b4c1646fa383d17c6681a5d8f8715dc"
 let checksumStreamer  = "5fb82b8f1c0f253faedd67c252038a029fe256ee519d09318f5cf17b2cf37b4c"
+let checksumStreamerCore = ""
 let checksumRTCHelper = "66238f7dcb0ffe7bc0eb8cd2bbdf617302d9f0585f41e543a5409daf49cd293f"
 let checksumWebRTC    = "2e089365df502588e6fc8720ce09ca910d00011a7bdf6676f97c495d266f81ef"
 
@@ -30,7 +31,8 @@ let package = Package(
         // Two products, and only two. The three shared binaries below are listed inside each
         // product's targets rather than as products of their own, so integrators pick one
         // library and get everything it needs — and never import Core directly, because the
-        // Player and Streamer modules re-export it (`@_exported import ShopliveCore`).
+        // Player and Streamer modules re-export it (`@_exported import ShopliveCore`). The Streamer
+        // module likewise re-exports its broadcast core (`@_exported import ShopliveStreamerCore`).
         .library(
             name: "ShoplivePlayerSDK",
             targets: [
@@ -44,6 +46,7 @@ let package = Package(
             name: "ShopliveStreamerSDK",
             targets: [
                 "ShopliveStreamerSDK",
+                "ShopliveStreamerCore",
                 "ShopliveCore",
                 "ShopLiveWebRTCHelperSDK",
                 "WebRTC"
@@ -62,6 +65,12 @@ let package = Package(
             name: "ShopliveStreamerSDK",
             url: "\(releaseBase)/ShopliveStreamerSDK.xcframework.zip",
             checksum: checksumStreamer
+        ),
+        // Broadcast core: the headless broadcast session and engines, linked by ShopliveStreamerSDK
+        .binaryTarget(
+            name: "ShopliveStreamerCore",
+            url: "\(releaseBase)/ShopliveStreamerCore.xcframework.zip",
+            checksum: checksumStreamerCore
         ),
         // Shared core: auth, configuration, logging, networking (bundle id cloud.shoplive.core)
         .binaryTarget(
