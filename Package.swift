@@ -9,12 +9,12 @@ import PackageDescription
 // The six values below are rewritten by scripts/release.sh. Do not edit them by hand.
 // Before the first release the checksums are empty, so resolution failing is expected.
 
-let sdkVersion        = "3.0.3"
-let checksumCore      = "ad9fb3a75fdb24c09d92425deebce8bf113c1996b6cabd85b30e9d8856605032"
-let checksumPlayer    = "2696ca66c4e285b6061ac892d23063e29ceb4bb3be5d07609fdf88bc03cc50eb"
-let checksumStreamer  = "8c1692b6a2c1dd7940c33e325e689b3c9f05d9945d7c690a95b8cd8dd0e440a1"
-let checksumRTCHelper = "d9d0666dbf9a996366ee372a2b49d6eab5f85eedec64a1384eb4c2556276b64e"
-let checksumWebRTC    = "4e37cfe327366c568db387e6e212f8c21bf75d53a5a6f4add2afd8aea69f3688"
+let sdkVersion        = "3.0.5"
+let checksumCore      = "acf9e29efd58daf85d8d0ebbc4f4be3cd30f732874dc7c9c78870ddb88c27d24"
+let checksumPlayer    = "3c58e4a88ac53f8b52232fe5e032e94f3384675f681743d513479a1d1627c9e8"
+let checksumStreamer  = "8bd19a85338f36ded6af03e53b282160a9f87c6a6a1dca82de8bd6ee5707068c"
+let checksumRTCHelper = "e5d64f511edc10ee0ddb07f5e74dc7dcd606de0eb999010405bb55395b3388f8"
+let checksumWebRTC    = "404db28c04852434a0736e44cd5c22c49e6a99ec6ca3f0d66a4b0da0626bb601"
 
 // MARK: -
 
